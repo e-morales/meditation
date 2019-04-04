@@ -2,7 +2,7 @@ from flask import Flask, g
 from flask import render_template, flash, redirect, url_for
 import json
 import models
-from forms import SessionForm
+from forms import SessionForm, PostForm
 
 DEBUG = True 
 PORT = 8000
@@ -25,21 +25,48 @@ def after_request(response):
     return response
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
     form = SessionForm()
+    if form.validate_on_submit():
+        # if its valid, create a new session
+        models.Session.create(name=form.name.data.strip(), description=form.description.data.strip(), duration=form.duration.data.strip(), audio=form.audio.data.strip())
+
+        flash("New Session registered. Called: {}".format(form.name.data))
+        #redirect to main Session index
+        return redirect('/r')
+        #if its not valid then send the user back to the original view 
     return render_template("new_session.html", title="New Session", form=form)
 
-@app.route('/sessions')
-@app.route('/sessions/<session>')
-def sessions(session=None):
-    with open('sessions.json') as json_data:
-            sessions = json.load(json_data)
-            if session == None:
-                return render_template('sessions.html', sessions=sessions)
-            else:
-                session_id = int(session)
-                return render_template('session.html', session=sessions[session_id])
+
+@app.route('/r')
+@app.route('/r/<session>')
+def r(session=None):
+    if session == None:
+        sessions = models.Session.select().limit(100)
+        return render_template("sessions.html", sessions=sessions)
+    else:
+        #find the right session
+        session_id = int(session)
+        session = models.Session.get(models.Session.id == session_id)
+
+    
+        #send the found Session to the template
+        return render_template("session.html", session=session, posts=posts, form=form)
+
+@app.route('/courses')
+@app.route('/courses/<course>')
+def courses(course=None):
+    if course == None:
+        courses = models.Course.select().limit(100)
+        return render_template("courses.html", courses=courses)
+    else:
+        course_id = int(course)
+        course = models.Course.get(models.Course.id == course_id)
+
+    return render_template("course.html", course=course)
+
+
 
 
 

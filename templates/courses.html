@@ -1,19 +1,19 @@
 {% extends "layout.html" %}
 {% block content %}
-<h1> Sessions </h1>
-{% for session in sessions %}
+<h1> Courses </h1>
+{% for course in courses %}
 <article class="message is-dark">
     <div class="message-header">
-        <a href={{url_for('r', session=session.id)}}> {{session.name}}</a>
+        <a href={{url_for('courses', course=course.id)}}> {{course.sleep}}</a>
     </div>
     <div class="message-body">
-        {{session.description}}
+        {{course.breathe}}
     </div>
     <div class="message-body">
-        {{session.duration}}
+        {{course.sleep}}
     </div>
     <div class="message-body">
-        {{session.audio}}
+        {{course.stress}}
     </div>
 </article>
 {% endfor %}
