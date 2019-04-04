@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>Session</h1>
+<article class="message is-dark">
+    <div class="message-header">
+        <a>{{session.name}}</a>
+    </div>
+    <div class="message-body">
+        {{session.description}}
+    </div>
+</article>
+{% endblock %}

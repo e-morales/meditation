@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1> Sessions </h1>
+{% for session in sessions %}
+<article class="message is-dark">
+    <div class="message-header">
+        <a href={{url_for('sessions', session=session.id)}}> {{session.name}}</a>
+    </div>
+    <div class="message-body">
+        {{session.description}}
+    </div>
+</article>
+{% endfor %}
+{% endblock %}
