@@ -4,25 +4,46 @@ from peewee import *
 DATABASE = SqliteDatabase('om.db')
 db = DATABASE
 
+
+class User(Model):
+    username = CharField()
+    email = CharField()
+    password = CharField()
+    photo = CharField()
+    progress = CharField()
+    isAdmin = False
+
+    class Meta:
+        database = DATABASE
+
+class Course(Model):
+    name = CharField()
+    description = CharField()
+    duration = CharField()
+
+    class Meta:
+        database = DATABASE
+
+
 class Session(Model):
     name = CharField()
     description = TextField()
-    duration = CharField()
+    duration = TimeField()
     audio = CharField()
+    number = IntegerField()
+    course = ForeignKeyField(Course, backref='sessions')
 
     class Meta:
         database = DATABASE
 
-
-class Course(Model):
-    breathe = CharField()
-    sleep = CharField()
-    stress = CharField()
+class UserCourseSession(Model):
+    user = ForeignKeyField(User)
+    course = ForeignKeyField(Course)
+    session = ForeignKeyField(Session)
+    current = BooleanField()
 
     class Meta:
         database = DATABASE
-
-
 
 
 # class Post(Model):
@@ -45,5 +66,5 @@ class Course(Model):
 # Initialize a connection to the database, create a table for the Session model, and close the connection
 def initialize():
         DATABASE.connect()
-        DATABASE.create_tables([Session, Course], safe=True)
+        DATABASE.create_tables([User, Session, Course, UserCourseSession], safe=True)
         DATABASE.close()
