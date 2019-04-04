@@ -19,7 +19,7 @@ def before_request():
     g.db.connect()
 
 @app.after_request
-def after_request():
+def after_request(response):
     """Close the DB connection after each request."""
     g.db.close()
     return response
