@@ -1,9 +1,7 @@
 import datetime
 from peewee import *
 
-DATABASE = SqliteDatabase('om.db')
-db = DATABASE
-
+db = SqliteDatabase('om.db')
 
 class User(Model):
     username = CharField()
@@ -14,7 +12,9 @@ class User(Model):
     isAdmin = False
 
     class Meta:
-        database = DATABASE
+        database = db
+
+    
 
 class Course(Model):
     name = CharField()
@@ -22,7 +22,9 @@ class Course(Model):
     duration = CharField()
 
     class Meta:
-        database = DATABASE
+        database = db
+
+    
 
 
 class Session(Model):
@@ -34,7 +36,9 @@ class Session(Model):
     course = ForeignKeyField(Course, backref='sessions')
 
     class Meta:
-        database = DATABASE
+        database = db
+
+    
 
 class UserCourseSession(Model):
     user = ForeignKeyField(User)
@@ -43,28 +47,14 @@ class UserCourseSession(Model):
     current = BooleanField()
 
     class Meta:
-        database = DATABASE
+        database = db
 
-
-# class Post(Model):
-#     timestamp = DateTimeField(default=datetime.datetime.now)
-#     user = CharField()
-#     title = CharField()
-#     text = TextField()
-#     # relate the post model to the session model
-#     session = ForeignKeyField(Session, backref="posts")
-    
-#     class Meta:
-#         database = DATABASE
-#         order_by = ('-timestamp',)
-
-
-
+   
 
 
 
 # Initialize a connection to the database, create a table for the Session model, and close the connection
 def initialize():
-        DATABASE.connect()
-        DATABASE.create_tables([User, Session, Course, UserCourseSession], safe=True)
-        DATABASE.close()
+        db.connect()
+        db.create_tables([User, Session, Course, UserCourseSession], safe=True)
+        db.close()

@@ -15,7 +15,7 @@ app.secret_key = 'poop'
 @app.before_request
 def before_request():
     """Connect to the DB before each request."""
-    g.db = models.DATABASE
+    g.db = models.db
     g.db.connect()
 
 @app.after_request
