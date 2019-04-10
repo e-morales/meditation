@@ -62,7 +62,10 @@ class LoginForm(Form):
 
 
 
-
+class UpdateAccountForm(Form):
+    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
+    email = StringField('Email', validators=[DataRequired()])
+    submit = SubmitField('Update')
 
 
 

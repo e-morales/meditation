@@ -1,4 +1,4 @@
-from flask import Flask, g
+from flask import Flask, g, request
 from flask import render_template, flash, redirect, url_for, session, escape
 import json
 import models
@@ -44,11 +44,17 @@ def after_request(response):
 
 
 @app.route('/')
+def index():
+    return render_template("landing.html")
+
+
 @app.route('/home')
-def home():
-    return render_template("home.html")
+@login_required
+def dash():
+    return render_template('dash.html')
 
 @app.route('/admin')
+@login_required
 def admin():
     return render_template("admin.html")
 
@@ -66,16 +72,8 @@ def register():
             login_user(user)
             name = user.username
             print('hello')
-            return redirect(url_for('home'))
+            return redirect(url_for('dash'))
 
-    # else:
-    #     flash("Hello, new student.", 'success')
-    #     models.User.create_user(
-    #         username=form.username.data,
-    #         email=form.email.data,
-    #         password=form.password.data
-    #     )
-    #     return redirect(url_for('courses'))
     return render_template('register.html', form=form)
 
 def admin_user():
@@ -105,7 +103,7 @@ def login():
             if check_password_hash(user.password, form.password.data):
                 login_user(user)
                 flash("Log in success",'success')
-                return redirect(url_for('home'))
+                return redirect(url_for('dash'))
             else: 
                 flash("Email or password are incorrect", 'error')
     return render_template('login.html', form=form)
@@ -116,17 +114,37 @@ def login():
 def logout():
     logout_user()
     flash("You've been logged out", "success")
-    return redirect(url_for('home'))
+    return redirect(url_for('dash'))
+
+
+@app.route("/account", methods=['GET', 'POST'])
+@login_required
+def account():
+    user = models.User.get(current_user.id)
+    form = forms.UpdateAccountForm()
+    if form.validate_on_submit():
+        user.username = form.username.data
+        user.email = form.email.data
+        user.save()
+        flash('Your account is updated', 'success')
+        return redirect(url_for('account'))
+    elif request.method =='GET':
+        form.username.data = current_user.username
+        form.email.data = current_user.email
+    return render_template('account.html', title='Account', form=form)
 
 
 
-@app.route('/courses')
+@app.route('/courses', methods=['GET', 'POST'])
+@login_required
 def courses():
-    return render_template("courses.html")
+    courses = models.Course.select()
+    return render_template("courses.html", courses=courses)
 
 
 
 @app.route('/sessions', methods=['GET', 'POST'])
+@login_required
 def sessions():
         #if its not valid then send the user back to the original view 
     return render_template("sessions.html", title="New Session")
@@ -144,10 +162,24 @@ if __name__ == '__main__':
             password='password'
         ),
         models.Course.create_course(
-            name = "Chill Vibes",
-            description = "Chill",
-            duration = "One hour",
-            progress = "Nice",
+            name = "Relax",
+            description = "Relaxation Techniques",
+            duration = "10 mins",
+            progress = "0%",
+            user = 1
+        ),
+        models.Course.create_course(
+            name = "Stress",
+            description = "Stress Relieving  Techniques",
+            duration = "10 mins",
+            progress = "0%",
+            user = 1
+        ),
+        models.Course.create_course(
+            name = "Sleep",
+            description = "Deep Sleep Techniques",
+            duration = "10 mins",
+            progress = "0%",
             user = 1
         )
     except ValueError:

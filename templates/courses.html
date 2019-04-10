@@ -2,17 +2,29 @@
 {% block content %}
 <h1> Courses </h1>
 {% for course in courses %}
-<article class="message is-dark">
-    <div class="message-header">
-        <a href={{url_for('courses', course=course.id)}}> {{course.name}}</a>
-    </div>
-    <div class="message-body">
-        {{course.description}} 
-    </div>
-    <div class="message-body">
-        {{course.duration}}
+    
+
+<article class="media content-section">
+    <div class="media-body">
+    <a class ="article-title" href={{url_for('courses')}}>
+        <div class="article-metadata">
+             {{course.name}}
+        </div>
+        <div class="article-content">
+            {{course.description}} 
+        </div>
+        <p class="article-content">
+            {{course.duration}}
+        </p>
+        <div class="message-body">
+            {{course.progress}}
+        </div>
+    </a>
+
     </div>
 </article>
+
+
 
 
 {% endfor %}
