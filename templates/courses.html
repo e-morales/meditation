@@ -4,17 +4,16 @@
 {% for course in courses %}
 <article class="message is-dark">
     <div class="message-header">
-        <a href={{url_for('courses', course=course.id)}}> {{course.sleep}}</a>
+        <a href={{url_for('courses', course=course.id)}}> {{course.name}}</a>
     </div>
     <div class="message-body">
-        {{course.breathe}}
+        {{course.description}} 
     </div>
     <div class="message-body">
-        {{course.sleep}}
-    </div>
-    <div class="message-body">
-        {{course.stress}}
+        {{course.duration}}
     </div>
 </article>
+
+
 {% endfor %}
 {% endblock %}

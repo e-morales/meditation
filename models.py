@@ -1,60 +1,97 @@
+import os
 import datetime
+import time
+import moment 
 from peewee import *
+from flask_login import UserMixin
+from flask_bcrypt import generate_password_hash
 
-db = SqliteDatabase('om.db')
+DATABASE = SqliteDatabase('om.db', pragmas={'foreign_keys': 1})
 
-class User(Model):
-    username = CharField()
-    email = CharField()
-    password = CharField()
-    photo = CharField()
-    progress = CharField()
-    isAdmin = False
+
+class User(UserMixin, Model):
+    username = CharField(unique=True, null=False)
+    email = CharField(unique=True, null=False)
+    password = CharField(max_length=25)
+
 
     class Meta:
-        database = db
+        database = DATABASE
+        db_table = 'user'
+
+    @classmethod
+    def create_user(cls, username, email, password):
+        try:
+            cls.create(
+                username = username,
+                email = email,
+                password = generate_password_hash(password) 
+            )
+        except IntegrityError:
+            raise ValueError("asdfghjk")
+
+    @classmethod
+    def get_courses(self):
+        return Course.select().where(Course.user == self)
 
     
-
 class Course(Model):
     name = CharField()
     description = CharField()
     duration = CharField()
+    progress = CharField()
+    user = ForeignKeyField(User, backref="courses")
 
     class Meta:
-        database = db
+        database = DATABASE
+        db_table = 'course'
 
-    
+    @classmethod
+    def create_course(cls, name, description, duration, progress, user):
+        try:
+            cls.create(
+                name = name,
+                description = description,
+                duration = duration,
+                progress = progress,
+                user=user
+            )
+        except IntegrityError:
+            raise ValueError("course error")
 
-
-class Session(Model):
+class Session(Course):
     name = CharField()
     description = TextField()
     duration = TimeField()
     audio = CharField()
     number = IntegerField()
-    course = ForeignKeyField(Course, backref='sessions')
+    course = ForeignKeyField(Course, backref='course')
 
     class Meta:
-        database = db
+        database = DATABASE
+        db_table = 'session'
+
+
 
     
 
 class UserCourseSession(Model):
-    user = ForeignKeyField(User)
-    course = ForeignKeyField(Course)
-    session = ForeignKeyField(Session)
-    current = BooleanField()
+    user = ForeignKeyField(User, backref="user")
+    course = ForeignKeyField(Course, backref="courses")
+    session = ForeignKeyField(Session, backref="sessions")
+    current = BooleanField(default=True)
 
     class Meta:
-        database = db
+        database = DATABASE
+        db_table = 'user_course_session'
 
-   
+
+
 
 
 
 # Initialize a connection to the database, create a table for the Session model, and close the connection
 def initialize():
-        db.connect()
-        db.create_tables([User, Session, Course, UserCourseSession], safe=True)
-        db.close()
+        DATABASE.connect()
+        DATABASE.create_tables([User, Course, Session, UserCourseSession], safe=True)
+        DATABASE.close()
