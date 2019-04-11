@@ -80,7 +80,7 @@ def admin_user():
     form = forms.RegisterForm()
     if form.validate_on_submit():
         if "mount.olympus" in form.email.data:
-            flash("Registered as an instructor", 'success')
+            flash("Registered as an admin", 'success')
             models.User.create_user(
                 username=form.username.data,
                 email=form.email.data,
@@ -141,13 +141,21 @@ def courses():
     courses = models.Course.select()
     return render_template("courses.html", courses=courses)
 
-
+@app.route('/course/<courseid>', methods=['GET', 'POST'])
+@login_required
+def add_course(courseid=None):
+    # course_present = models.UserCourseSession.select().where(models.UserCourseSession.user==current_user.id, models.UserCourseSession.course==courseid).get()
+    # if course_present == None:
+    courses = models.UserCourseSession.create_user_session(current_user.id, courseid, 1)
+    courses = models.Course.select()
+    
+    return render_template("courses.html", courses=courses)
 
 @app.route('/sessions', methods=['GET', 'POST'])
 @login_required
 def sessions():
-        #if its not valid then send the user back to the original view 
-    return render_template("sessions.html", title="New Session")
+    sessions = models.Session.select()
+    return render_template("sessions.html", sessions=sessions)
 
 
 
@@ -181,7 +189,15 @@ if __name__ == '__main__':
             duration = "10 mins",
             progress = "0%",
             user = 1
+        ),
+        models.Session.create_session(
+            name = "Session 1",
+            description = "This is the first session",
+            duration = 10,
+            audio = "this is sound",
+            course = 1,
         )
+
     except ValueError:
         pass
 

@@ -70,6 +70,20 @@ class Session(Course):
     class Meta:
         database = DATABASE
         db_table = 'session'
+    
+    @classmethod
+    def create_session(cls, name, description, duration, audio, course):
+        try:
+            cls.create(
+                name = name,
+                description = description,
+                duration = duration,
+                audio = audio,
+                course=course
+            )
+        except IntegrityError:
+            raise ValueError("course error")
+
 
 
 
@@ -85,6 +99,16 @@ class UserCourseSession(Model):
         database = DATABASE
         db_table = 'user_course_session'
 
+    @classmethod
+    def create_user_session(cls, user, course, session):
+        try:
+            cls.create(
+                user = user,
+                course=course,
+                session = session
+            )
+        except IntegrityError:
+            raise ValueError("course error")
 
 
 

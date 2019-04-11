@@ -2,19 +2,25 @@
 {% block content %}
 <h1> Sessions </h1>
 {% for session in sessions %}
-<article class="message is-dark">
-    <div class="message-header">
-        <a href={{url_for('r', session=session.id)}}> {{session.name}}</a>
-    </div>
-    <div class="message-body">
-        {{session.description}}
-    </div>
-    <div class="message-body">
-        {{session.duration}}
-    </div>
-    <div class="message-body">
-        {{session.audio}}
+<article class="media content-section">
+    <div class="media-body">
+    <a class ="article-title" href={{url_for('sessions')}}>
+        <div class="article-metadata">
+             {{session.name}}
+        </div>
+        <div class="article-content">
+            {{session.description}}
+        </div>
+        <p class="article-content">
+            {{session.duration}}
+        </p>
+        <div class="message-body">
+            {{session.audio}}
+        </div>
+    </a>
     </div>
 </article>
 {% endfor %}
 {% endblock %}
+
+
