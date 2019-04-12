@@ -1,7 +1,11 @@
 {% extends "layout.html" %}
 {% block content %}
 <h1> Sessions </h1>
+<h3>Sesh One</h3>
+ <audio controls id="song" src="{{ url_for('static', filename='headspace.mp3') }}"></audio>
+ <button class="btn btn-warning">Add Sesh</button>
 {% for session in sessions %}
+<p>1</p>
 <article class="media content-section">
     <div class="media-body">
     <a class ="article-title" href={{url_for('sessions')}}>
@@ -19,6 +23,7 @@
         </div>
     </a>
     
+
     </div>
 </article>
 {% endfor %}

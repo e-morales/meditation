@@ -2,6 +2,9 @@ body {
   background-color: orange;
 }
 
+.orange-lobster {
+  color: orange;
+} 
 
 .lobster {
   font-family: 'Lobster', cursive;

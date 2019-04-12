@@ -4,18 +4,19 @@
     <div class="jumbotron text-center">
         <h1> Dash</h1>
 
-      <audio controls>
-        <source src="{{ url_for('static', filename='headspace.mp3') }}" type="file/mpeg">
-    </audio>
-        
+    
+            <!--<button type="button" class="music" onclick="play()"></button>-->
+           
     {% for course in courses%}
 
         <p>{{course.course.name}}</p>
-            {% for session in course.sessions%}
+            {% for session in course.sessions %}
                 <p>{{session.session.name}}</p>
-            {% endfor %}
+    {% endfor %}
             
         
     {% endfor %}
     </div>
+       <a href="{{url_for('courses')}}"> <h2 class="mt-5">Add Courses now!</h2></a>
+
 {% endblock %}

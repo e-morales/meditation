@@ -28,7 +28,7 @@ class User(UserMixin, Model):
                 password = generate_password_hash(password) 
             )
         except IntegrityError:
-            raise ValueError("asdfghjk")
+            raise
 
     @classmethod
     def get_courses(self):
@@ -66,28 +66,25 @@ class Session(Course):
     audio = CharField()
     number = IntegerField()
     course = ForeignKeyField(Course, backref='course')
+    progress = IntegerField(default=0)
 
     class Meta:
         database = DATABASE
         db_table = 'session'
     
     @classmethod
-    def create_session(cls, name, description, duration, audio, course):
+    def create_session(cls, name, description, duration, audio, course, number):
         try:
             cls.create(
                 name = name,
                 description = description,
                 duration = duration,
                 audio = audio,
+                number=number,
                 course=course
             )
         except IntegrityError:
-            raise ValueError("course error")
-
-
-
-
-    
+            raise
 
 class UserCourseSession(Model):
     user = ForeignKeyField(User, backref="user")
@@ -109,10 +106,6 @@ class UserCourseSession(Model):
             )
         except IntegrityError:
             raise ValueError("course error")
-
-
-
-
 
 # Initialize a connection to the database, create a table for the Session model, and close the connection
 def initialize():

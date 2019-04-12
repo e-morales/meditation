@@ -51,26 +51,17 @@ def index():
 @login_required
 def dash():
     courses = models.UserCourseSession.select(models.Course).join(models.Course).where(models.UserCourseSession.user==current_user.id)
-    print(courses)
-    for course in courses:
-        print(course.course.id)
-        sessions = models.UserCourseSession.select(models.Session).join(models.Session).where(models.UserCourseSession.user==current_user.id, models.Session.course==course.course.id)
-        # for session in sessions:
-            # print(session.session.id)
-        course.sessions = sessions
-        print(course.sessions)
-        
-    return render_template('dash.html', courses=courses)
-
-@app.route('/sessions/<course_id>')
-@login_required
-def get_sessions(course_id):
-    courses = models.UserCourseSession.select(models.Course).join(models.Course).where(models.UserCourseSession.user==current_user.id)
-    sessions = models.UserCourseSession.select(models.Session).join(models.Session).where(models.UserCourseSession.user==current_user.id, models.UserCourseSession.course==course_id)
-    print(sessions)
+    # print(courses)
     # for course in courses:
-    #     print(course.session.audio)
+    #     print(course.course.id)
+    #     sessions = models.UserCourseSession.select(models.Session).join(models.Session).where(models.UserCourseSession.user==current_user.id, models.Session.course==course.course.id)
+    #     # for session in sessions:
+    #         # print(session.session.id)
+    #     course.sessions = sessions
+        
     return render_template('dash.html', courses=courses, sessions=sessions)
+
+
 
 
 ##### ===== Registration ======
@@ -145,10 +136,10 @@ def courses():
 @app.route('/courses/<courseid>', methods=['GET', 'POST'])
 @login_required
 def add_course(courseid=None):
-    # course_present = models.UserCourseSession.select().where(models.UserCourseSession.user==current_user.id, models.UserCourseSession.course==courseid).get()
+    courses = models.UserCourseSession.select().where(models.UserCourseSession.user==current_user.id, models.UserCourseSession.course==courseid).get()
     # if course_present == None:
-    courses = models.UserCourseSession.create_user_session(current_user.id, courseid, 1)
-    courses = models.Course.select()
+    # courses = models.UserCourseSession.select()
+
     
     return render_template("dash.html", courses=courses)
 
@@ -156,50 +147,70 @@ def add_course(courseid=None):
 @app.route('/sessions', methods=['GET', 'POST'])
 @login_required
 def sessions():
+
     sessions = models.Session.select()
-    return render_template("sessions.html", sessions=sessions)
+    return render_template("sessions.html")
 
-
+@app.route('/sessions/<course_id>')
+@login_required
+def get_sessions(course_id):
+    print('in route')
+    courses = models.UserCourseSession.select(models.Course).join(models.Course).where(models.UserCourseSession.user==current_user.id)
+    sessions = models.UserCourseSession.select(models.Session).join(models.Session).where(models.UserCourseSession.user==current_user.id, models.UserCourseSession.course==course_id)
+    print(sessions)
+    # for course in courses:
+    #     print(course.session.audio)
+    return render_template('dash.html', courses=courses, sessions=sessions)
 
 if __name__ == '__main__':
     # initialize connection to models
     models.initialize()
-    try:
-        models.User.create_user(
-            username='enrique',
-            email="enrique@enrique.com",
-            password='password'
-        ),
-        models.Course.create_course(
-            name = "Relax",
-            description = "Relaxation Techniques",
-            duration = "10 mins",
-            progress = "0%",
-            user = 1
-        ),
-        models.Course.create_course(
-            name = "Stress",
-            description = "Stress Relieving  Techniques",
-            duration = "10 mins",
-            progress = "0%",
-            user = 1
-        ),
-        models.Course.create_course(
-            name = "Sleep",
-            description = "Deep Sleep Techniques",
-            duration = "10 mins",
-            progress = "0%",
-            user = 1
-        ),
-        models.Session.create_session(
-            name = "Session 1",
-            description = "This is the first session",
-            duration = 10,
-            audio = "this is sound",
-            course = 1,
-        )
+    # try:
+    #     models.User.create_user(
+    #         username='enrique',
+    #         email="enrique@enrique.com",
+    #         password='password'
+    #     )
+    #     models.Course.create_course(
+    #         name = "Relax",
+    #         description = "Relaxation Techniques",
+    #         duration = "10 mins",
+    #         progress = "0%",
+    #         user = 1
+    #     )
+    #     models.Course.create_course(
+    #         name = "Stress",
+    #         description = "Stress Relieving  Techniques",
+    #         duration = "10 mins",
+    #         progress = "0%",
+    #         user = 1
+    #     )
+    #     models.Course.create_course(
+    #         name = "Sleep",
+    #         description = "Deep Sleep Techniques",
+    #         duration = "10 mins",
+    #         progress = "0%",
+    #         user = 1
+    #     )
+    #     models.Session.create_session(
+    #         name = "Session 1",
+    #         description = "This is the first session",
+    #         number = 1,
+    #         duration = 10,
+    #         audio = "this is sound",
+    #         course = 1,
+    #     )
+    #     models.Session.create_session(
+    #         name = "Session 2",
+    #         description = "This is the first session",
+    #         number = 1,
+    #         duration = 10,
+    #         audio = "this is sound",
+    #         course = 1,
+    #     )
+        
 
-    except ValueError:
-        pass
+    # except ValueError:
+    #     pass
 
 app.run(debug=True, port=PORT)
