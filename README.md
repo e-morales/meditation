@@ -9,9 +9,9 @@ Each course provides a list of sessions with techniques to become mindful of eac
 As a beginner diving into meditation, I want to learn techniques to relax and become more mindful. I want to save my courses and progress as I complete each session.
 
 ## Stack
-Built with Python and Flask
-Styled using Bootstrap
-SQLite as its database
+* Built with Python and Flask
+* Styled using Bootstrap
+* SQLite as its database
 
 ## Dependenies
 * bcrypt==3.1.6
