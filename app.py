@@ -1,12 +1,13 @@
-from flask import Flask, g, request
-from flask import render_template, flash, redirect, url_for, session, escape
 import json
-import models
-from config import Config
-from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from flask_wtf import FlaskForm
 import forms
+import models
+
+from config import Config
+from flask_wtf import FlaskForm
+from flask import Flask, g, request
 from flask_bcrypt import check_password_hash
+from flask import render_template, flash, redirect, url_for, session, escape
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 
 DEBUG = True
 PORT = 8000
@@ -26,7 +27,6 @@ def load_user(userid):
     except models.DoesNotExist:
         return None
 
-
 # Handle requests coming in before and when they complete after
 @app.before_request
 def before_request():
@@ -42,7 +42,6 @@ def after_request(response):
     return response
 
 
-
 @app.route('/')
 def index():
     return render_template("landing.html")
@@ -51,14 +50,30 @@ def index():
 @app.route('/home')
 @login_required
 def dash():
-    return render_template('dash.html')
+    courses = models.UserCourseSession.select(models.Course).join(models.Course).where(models.UserCourseSession.user==current_user.id)
+    print(courses)
+    for course in courses:
+        print(course.course.id)
+        sessions = models.UserCourseSession.select(models.Session).join(models.Session).where(models.UserCourseSession.user==current_user.id, models.Session.course==course.course.id)
+        # for session in sessions:
+            # print(session.session.id)
+        course.sessions = sessions
+        print(course.sessions)
+        
+    return render_template('dash.html', courses=courses)
 
-@app.route('/admin')
+@app.route('/sessions/<course_id>')
 @login_required
-def admin():
-    return render_template("admin.html")
+def get_sessions(course_id):
+    courses = models.UserCourseSession.select(models.Course).join(models.Course).where(models.UserCourseSession.user==current_user.id)
+    sessions = models.UserCourseSession.select(models.Session).join(models.Session).where(models.UserCourseSession.user==current_user.id, models.UserCourseSession.course==course_id)
+    print(sessions)
+    # for course in courses:
+    #     print(course.session.audio)
+    return render_template('dash.html', courses=courses, sessions=sessions)
 
-##### ==++= Registration ======
+
+##### ===== Registration ======
 @app.route('/register', methods=('GET', 'POST'))
 def register():
     form = forms.RegisterForm()
@@ -76,21 +91,8 @@ def register():
 
     return render_template('register.html', form=form)
 
-def admin_user():
-    form = forms.RegisterForm()
-    if form.validate_on_submit():
-        if "mount.olympus" in form.email.data:
-            flash("Registered as an admin", 'success')
-            models.User.create_user(
-                username=form.username.data,
-                email=form.email.data,
-                password=form.password.data        
-            )
-        return redirect(url_for('admin'))
 
-
-
-## login 
+## Login 
 @app.route('/login', methods=('GET', 'POST'))
 def login():
     form = forms.LoginForm()
@@ -134,14 +136,13 @@ def account():
     return render_template('account.html', title='Account', form=form)
 
 
-
 @app.route('/courses', methods=['GET', 'POST'])
 @login_required
 def courses():
     courses = models.Course.select()
     return render_template("courses.html", courses=courses)
 
-@app.route('/course/<courseid>', methods=['GET', 'POST'])
+@app.route('/courses/<courseid>', methods=['GET', 'POST'])
 @login_required
 def add_course(courseid=None):
     # course_present = models.UserCourseSession.select().where(models.UserCourseSession.user==current_user.id, models.UserCourseSession.course==courseid).get()
@@ -149,14 +150,14 @@ def add_course(courseid=None):
     courses = models.UserCourseSession.create_user_session(current_user.id, courseid, 1)
     courses = models.Course.select()
     
-    return render_template("courses.html", courses=courses)
+    return render_template("dash.html", courses=courses)
+
 
 @app.route('/sessions', methods=['GET', 'POST'])
 @login_required
 def sessions():
     sessions = models.Session.select()
     return render_template("sessions.html", sessions=sessions)
-
 
 
 

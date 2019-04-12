@@ -1,12 +1,13 @@
-from flask_wtf import FlaskForm as Form   
-from wtforms import TextField, TextAreaField, SubmitField, StringField, PasswordField, SelectField, TimeField
-from flask_wtf.file import FileField, FileAllowed
-from flask_login import current_user
-from models import User
-import datetime
-import moment
 import time
+import moment
+import datetime
+
+from models import User
+from flask_login import current_user
+from flask_wtf import FlaskForm as Form  
+from flask_wtf.file import FileField, FileAllowed
 from wtforms.validators import DataRequired, Regexp, ValidationError, Email, Length, EqualTo
+from wtforms import TextField, TextAreaField, SubmitField, StringField, PasswordField, SelectField, TimeField
 
 
 def name_exists(form, field):
@@ -16,7 +17,6 @@ def name_exists(form, field):
 def email_exists(form, field):
     if User.select().where(User.email == field.data).exists():
         raise ValidationError('User with that email already exists.')
-
 
 class RegisterForm(Form):
     username = StringField(
@@ -51,40 +51,16 @@ class RegisterForm(Form):
         validators=[DataRequired()]
     )
 
-    submit = SubmitField('submit')
+    submit = SubmitField('Sign Up')
 
 
 class LoginForm(Form):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
-    submit = SubmitField('submit')
-
-
+    submit = SubmitField('Log in')
 
 
 class UpdateAccountForm(Form):
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField('Email', validators=[DataRequired()])
     submit = SubmitField('Update')
-
-
-
-
-
-# class SessionForm(Form):
-#     name = TextField("Name this session")
-#     description = TextAreaField("Add a description for the session here")
-#     duration = TextField("The session is this many minutes")
-#     audio = TextField("The audio is slappin'")
-#     submit = SubmitField("Create Session")
-
-
-# class PostForm(Form):
-#     user = TextField("By:")
-#     title = TextField("Title")
-#     text = TextAreaField("Content")
-#     submit = SubmitField('Create Post') 
-
-
-
-    

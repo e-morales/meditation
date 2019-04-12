@@ -3,5 +3,19 @@
 {% block content %}
     <div class="jumbotron text-center">
         <h1> Dash</h1>
+
+      <audio controls>
+        <source src="{{ url_for('static', filename='headspace.mp3') }}" type="file/mpeg">
+    </audio>
+        
+    {% for course in courses%}
+
+        <p>{{course.course.name}}</p>
+            {% for session in course.sessions%}
+                <p>{{session.session.name}}</p>
+            {% endfor %}
+            
+        
+    {% endfor %}
     </div>
 {% endblock %}

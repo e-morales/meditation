@@ -1,8 +1,16 @@
 {% extends 'layout.html' %}
 
 {% block content %}
-    <div class="jumbotron text-center">
-        <h1> Welcome to Om. </h1>
-        <p class="lead"> find your INNNERgy </p>
+    <div class="jumbotron text-center mt-5">
+        <h1> Welc<span class='lobster'>Om</span>e. </h1>
+        <p class="lead"> find your INNERgy </p>
+    <a href="{{url_for('login')}}">
+        <button class="m-5 btn btn-warning">Login</button>
+    </a>
+    <img src="../static/images/monk.png"/>
+    <a href="{{url_for('register')}}">
+        <button class="m-5 btn btn-outline-warning">Sign Up</button>
+    </a>
     </div>
+    
 {% endblock %}
