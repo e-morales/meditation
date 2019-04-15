@@ -4,19 +4,23 @@
     <div class="jumbotron text-center">
         <h1> Dash</h1>
 
-    
-            <!--<button type="button" class="music" onclick="play()"></button>-->
-           
-    {% for course in courses%}
+        {% for course in courses %}
 
-        <p>{{course.course.name}}</p>
-            {% for session in course.sessions %}
-                <p>{{session.session.name}}</p>
-    {% endfor %}
-            
-        
-    {% endfor %}
+        <article class="media content-section">
+            <div class="media-body">
+                <div class="article-metadata">
+                    {{course.name}}
+                </div>
+                <div class="article-content">
+                    {{course.description}} 
+                </div>
+                <p class="article-content">
+                    {{course.duration}}
+                </p>
+            </div>
+        </article>
+
+        {% endfor %}
+        <!--<button type="button" class="music" onclick="play()"></button>-->
     </div>
-       <a href="{{url_for('courses')}}"> <h2 class="mt-5">Add Courses now!</h2></a>
-
 {% endblock %}

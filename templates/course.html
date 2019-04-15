@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h1> Course </h1>
+    <article>
+        <div>
+            <a>{{course.name}}</a>
+        </div>
+        <div>
+            {{course.description}}
+        </div>
+        <div>
+            {{course.duration}}
+        </div>
+    </article>
+
+{% if sessions %}
+    <h1>Sessions List</h1>
+    {% for session in sessions %}
+    <article class="message is-primary">
+        <div class="message-header">
+            <a href={{url_for('sessions', id=session.id)}}>{{session.name}}</a>
+
+            <p>By: {{session.course}}</p>
+        </div>
+        <div class="message-body">
+            {{session.audio}}
+        </div>
+        <a>courses/{{session.course}}</a>
+    </article>
+    {% endfor %}
+  {% endif %}
+
+
+    <section>
+          <h2>Add a Session to this Course</h2>
+          <form method="POST" action="" novalidate>
+              {{ form.hidden_tag() }}
+
+              <div>
+              {{ form.name.label }}
+              {{ form.name() }}
+              </div>
+              <div>
+              {{ form.audio.label }}
+              {{ form.audio() }}
+              </div>
+              <div>
+              {{ form.course.label() }}
+              {{ form.course(class_="input") }}
+              </div>
+
+              {{ form.submit() }}
+          </form>
+      </section>
+{% endblock %}

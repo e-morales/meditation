@@ -2,20 +2,16 @@ import json
 import forms
 import models
 
-from config import Config
-from flask_wtf import FlaskForm
 from flask import Flask, g, request
 from flask_bcrypt import check_password_hash
 from flask import render_template, flash, redirect, url_for, session, escape
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 
-DEBUG = True
-PORT = 8000
 
 app = Flask(__name__)
-app.config.from_object(Config)
+app.secret_key = 'poop'
 
-# login manager module initialization
+#login module initialization
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -27,64 +23,27 @@ def load_user(userid):
     except models.DoesNotExist:
         return None
 
-# Handle requests coming in before and when they complete after
+
+# handle requests coming in before and when they complete after
 @app.before_request
 def before_request():
-    """Connect to the DB before each request."""
-    g.db = models.DATABASE
+    """Connect to the db before each request."""
+    g.db = models.database
     g.db.connect()
-    g.user = current_user
 
 @app.after_request
 def after_request(response):
-    """Close the DB connection after each request."""
+    """Connect to the db after each request."""
     g.db.close()
     return response
 
-
+# Landing page 
 @app.route('/')
 def index():
     return render_template("landing.html")
 
-
-@app.route('/home')
-@login_required
-def dash():
-    courses = models.UserCourseSession.select(models.Course).join(models.Course).where(models.UserCourseSession.user==current_user.id)
-    # print(courses)
-    # for course in courses:
-    #     print(course.course.id)
-    #     sessions = models.UserCourseSession.select(models.Session).join(models.Session).where(models.UserCourseSession.user==current_user.id, models.Session.course==course.course.id)
-    #     # for session in sessions:
-    #         # print(session.session.id)
-    #     course.sessions = sessions
-        
-    return render_template('dash.html', courses=courses, sessions=sessions)
-
-
-
-
-##### ===== Registration ======
-@app.route('/register', methods=('GET', 'POST'))
-def register():
-    form = forms.RegisterForm()
-    if form.validate_on_submit():
-            models.User.create_user(
-                username=form.username.data,
-                email=form.email.data,
-                password=form.password.data        
-            )
-            user = models.User.get(models.User.username == form.username.data)
-            login_user(user)
-            name = user.username
-            print('hello')
-            return redirect(url_for('dash'))
-
-    return render_template('register.html', form=form)
-
-
-## Login 
-@app.route('/login', methods=('GET', 'POST'))
+# Login
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     form = forms.LoginForm()
     if form.validate_on_submit():
@@ -95,22 +54,85 @@ def login():
         else:
             if check_password_hash(user.password, form.password.data):
                 login_user(user)
-                flash("Log in success",'success')
+                flash("Log in success", 'success')
                 return redirect(url_for('dash'))
-            else: 
+            else:
                 flash("Email or password are incorrect", 'error')
     return render_template('login.html', form=form)
-
-
+# Logout
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
-    flash("You've been logged out", "success")
-    return redirect(url_for('dash'))
+    flash("You've been logged out.", 'success')
+    return redirect(url_for('index'))
 
 
-@app.route("/account", methods=['GET', 'POST'])
+# Sign up
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    form = forms.SignUpForm()
+    if form.validate_on_submit():
+        models.User.create_user(
+            username=form.username.data,
+            email=form.email.data,
+            password=form.password.data,
+        )
+        user = models.User.get(models.User.username == form.username.data)
+        login_user(user)
+        name = user.username
+        print('Yo')
+        return redirect(url_for('dash'))
+    return render_template('signup.html', form=form)
+
+
+# Dashboard Route
+@app.route('/dash', methods=['GET', 'POST'])
+@login_required
+def dash():
+    # courses = models.UserCourseSession.select(models.Course).join(models.Course).where(models.UserCourseSession.user==current_user.id)
+    form = forms.CourseForm()
+    if form.validate_on_submit():
+        models.Course.create(name=form.name.data, description=form.description.data, duration=form.duration.data)
+        flash("New Course {} Created".format(form.name.data))
+        return redirect('/courses')
+    return render_template('new_course.html', title="New Course", form=form)
+
+
+# Courses Route
+@app.route('/courses', methods=['GET', 'POST'])
+@app.route('/courses/<course>')
+@login_required
+def courses(course=None):
+    if course == None:
+        courses = models.Course.select()
+        return render_template('courses.html', courses=courses)
+    else:
+        course_id = int(course)
+        course = models.Course.get(models.Course.id == course_id)
+        sessions = course.sessions
+
+        form = forms.SessionForm()
+        if form.validate_on_submit():
+            models.Session.create(
+                name=form.name.data,
+                audio=form.audio.data,
+                session=session)
+            flash("New Session created")
+            return redirect("/courses/{}".format(course_id))
+        return render_template("course.html", course=course, sessions=sessions, form=form)
+
+# Save course to dash
+
+    
+    
+
+
+
+    
+
+# Account Route
+@app.route('/account', methods=['GET', 'POST'])
 @login_required
 def account():
     user = models.User.get(current_user.id)
@@ -119,98 +141,23 @@ def account():
         user.username = form.username.data
         user.email = form.email.data
         user.save()
-        flash('Your account is updated', 'success')
+        flash("Your account has been updated.", 'success')
         return redirect(url_for('account'))
-    elif request.method =='GET':
+    elif request.method == 'GET':
         form.username.data = current_user.username
         form.email.data = current_user.email
-    return render_template('account.html', title='Account', form=form)
+    return render_template('account.html', form=form)
 
 
-@app.route('/courses', methods=['GET', 'POST'])
-@login_required
-def courses():
-    courses = models.Course.select()
-    return render_template("courses.html", courses=courses)
-
-@app.route('/courses/<courseid>', methods=['GET', 'POST'])
-@login_required
-def add_course(courseid=None):
-    courses = models.UserCourseSession.select().where(models.UserCourseSession.user==current_user.id, models.UserCourseSession.course==courseid).get()
-    # if course_present == None:
-    # courses = models.UserCourseSession.select()
-
-    
-    return render_template("dash.html", courses=courses)
 
 
-@app.route('/sessions', methods=['GET', 'POST'])
-@login_required
-def sessions():
+DEBUG = True
+PORT = 8000
 
-    sessions = models.Session.select()
-    return render_template("sessions.html")
 
-@app.route('/sessions/<course_id>')
-@login_required
-def get_sessions(course_id):
-    print('in route')
-    courses = models.UserCourseSession.select(models.Course).join(models.Course).where(models.UserCourseSession.user==current_user.id)
-    sessions = models.UserCourseSession.select(models.Session).join(models.Session).where(models.UserCourseSession.user==current_user.id, models.UserCourseSession.course==course_id)
-    print(sessions)
-    # for course in courses:
-    #     print(course.session.audio)
-    return render_template('dash.html', courses=courses, sessions=sessions)
 
 if __name__ == '__main__':
-    # initialize connection to models
     models.initialize()
-    # try:
-    #     models.User.create_user(
-    #         username='enrique',
-    #         email="enrique@enrique.com",
-    #         password='password'
-    #     )
-    #     models.Course.create_course(
-    #         name = "Relax",
-    #         description = "Relaxation Techniques",
-    #         duration = "10 mins",
-    #         progress = "0%",
-    #         user = 1
-    #     )
-    #     models.Course.create_course(
-    #         name = "Stress",
-    #         description = "Stress Relieving  Techniques",
-    #         duration = "10 mins",
-    #         progress = "0%",
-    #         user = 1
-    #     )
-    #     models.Course.create_course(
-    #         name = "Sleep",
-    #         description = "Deep Sleep Techniques",
-    #         duration = "10 mins",
-    #         progress = "0%",
-    #         user = 1
-    #     )
-    #     models.Session.create_session(
-    #         name = "Session 1",
-    #         description = "This is the first session",
-    #         number = 1,
-    #         duration = 10,
-    #         audio = "this is sound",
-    #         course = 1,
-    #     )
-    #     models.Session.create_session(
-    #         name = "Session 2",
-    #         description = "This is the first session",
-    #         number = 1,
-    #         duration = 10,
-    #         audio = "this is sound",
-    #         course = 1,
-    #     )
+    
         
-
-    # except ValueError:
-    #     pass
-
-app.run(debug=True, port=PORT)
+    app.run(debug=DEBUG, port=PORT)

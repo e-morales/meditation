@@ -16,11 +16,7 @@
         <p class="article-content">
             {{course.duration}}
         </p>
-        <div class="message-body">
-            {{course.progress}}
-        </div>
-        <a href="{{url_for('sessions', courseid=course.id)}}">View Sessions</a>
-    </a>
+        <a class ="article-title" href={{url_for('dash')}}><button>Save Course</button></a>
 
     </div>
 </article>
