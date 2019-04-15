@@ -1,4 +1,7 @@
 # Om
+
+![Screenshot ](../master/static/images/monk.png)
+
 ## A meditation app for beginners
 
 Welcome to Om!
@@ -33,8 +36,10 @@ As a beginner diving into meditation, I want to learn techniques to relax and be
 
 
 # WireFrame
+![Screenshot ](../master/static/images/OmWireframe.jpg)
 
 # Models
+![Screenshot ](../master/static/images/OmModels.png)
 
 # Future Features
 * Implementing an achievement system
