@@ -1,4 +1,5 @@
 # Om
+(https://github.com/e-morales/meditation/blob/master/static/images/monk.png)
 ## A meditation app for beginners
 
 Welcome to Om!
