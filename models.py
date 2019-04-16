@@ -17,14 +17,16 @@ class User(BaseModel, UserMixin):
     username = CharField(unique=True)
     email = CharField()
     password = CharField(max_length=15)
+    admin = BooleanField(default=False)
 
     @classmethod
-    def create_user(cls, username, email, password):
+    def create_user(cls, username, email, password, admin=False):
         try:
             cls.create(
                 username = username,
                 email = email,
-                password = generate_password_hash(password)
+                password = generate_password_hash(password),
+                admin = admin
             )
         except IntegrityError:
             raise
@@ -66,15 +68,15 @@ class Session(BaseModel):
 class UserCourseSession(BaseModel):
     user = ForeignKeyField(User, backref="user")
     course = ForeignKeyField(Course, backref="courses")
-    session = ForeignKeyField(Session, backref="sessions")
+    # session = ForeignKeyField(Session, backref="sessions")
 
     @classmethod
-    def create_user_session(cls, user, course, session):
+    def create_user_session(cls, user, course):
         try:
             cls.create(
                 user = user,
                 course = course,
-                session = session
+                # session = session
             )
         except IntegrityError:
             raise ValueError("course error")

@@ -16,7 +16,16 @@
         <p class="article-content">
             {{course.duration}}
         </p>
-        <a class ="article-title" href={{url_for('dash')}}><button>Save Course</button></a>
+
+
+        <form method="POST" action="" novalidate>
+        {{ form.hidden_tag() }}
+
+      
+    
+        {{ form.submit() }}
+    </form>
+       <!-- <a class ="article-title" href={{url_for('dash')}}><button>Save Course</button></a> -->
 
     </div>
 </article>

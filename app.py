@@ -59,6 +59,7 @@ def login():
             else:
                 flash("Email or password are incorrect", 'error')
     return render_template('login.html', form=form)
+
 # Logout
 @app.route('/logout')
 @login_required
@@ -90,13 +91,12 @@ def signup():
 @app.route('/dash', methods=['GET', 'POST'])
 @login_required
 def dash():
-    # courses = models.UserCourseSession.select(models.Course).join(models.Course).where(models.UserCourseSession.user==current_user.id)
     form = forms.CourseForm()
     if form.validate_on_submit():
         models.Course.create(name=form.name.data, description=form.description.data, duration=form.duration.data)
         flash("New Course {} Created".format(form.name.data))
         return redirect('/courses')
-    return render_template('new_course.html', title="New Course", form=form)
+    return render_template('new_course.html', title="New Course", form=form, courses=courses)
 
 
 # Courses Route
@@ -104,32 +104,22 @@ def dash():
 @app.route('/courses/<course>')
 @login_required
 def courses(course=None):
+    form = forms.UserCourseSessionForm()
     if course == None:
         courses = models.Course.select()
-        return render_template('courses.html', courses=courses)
+        return render_template('courses.html', courses=courses, form=form)
     else:
         course_id = int(course)
         course = models.Course.get(models.Course.id == course_id)
-        sessions = course.sessions
-
-        form = forms.SessionForm()
         if form.validate_on_submit():
-            models.Session.create(
-                name=form.name.data,
-                audio=form.audio.data,
-                session=session)
-            flash("New Session created")
-            return redirect("/courses/{}".format(course_id))
-        return render_template("course.html", course=course, sessions=sessions, form=form)
+            models.UserCourseSession.create(
+                user = current_user.id,
+                course = form.course_id.data
 
-# Save course to dash
+            )
 
-    
-    
+        return render_template("course.html", course=course, form=form)
 
-
-
-    
 
 # Account Route
 @app.route('/account', methods=['GET', 'POST'])
@@ -149,8 +139,6 @@ def account():
     return render_template('account.html', form=form)
 
 
-
-
 DEBUG = True
 PORT = 8000
 
@@ -158,6 +146,7 @@ PORT = 8000
 
 if __name__ == '__main__':
     models.initialize()
+    
     
         
     app.run(debug=DEBUG, port=PORT)

@@ -69,7 +69,7 @@ class CourseForm(Form):
     duration = TextField("Add Duration")
     submit = SubmitField('Create Course')
 
-class SessionForm(Form):
-    name = TextField("Name this Session")
-    audio = TextAreaField("Add Audio")
-    submit = SubmitField('Create Session')
+class UserCourseSessionForm(Form):
+    user = TextField(),
+    course = TextField(),
+    sumbit = SubmitField()
