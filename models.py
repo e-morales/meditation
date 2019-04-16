@@ -6,84 +6,98 @@ from peewee import *
 from flask_login import UserMixin
 from flask_bcrypt import generate_password_hash
 
-database = SqliteDatabase('om.db')
+DATABASE = SqliteDatabase('om.db', pragmas={'foreign_keys': 1})
 
-#connects models to database
-class BaseModel(Model):
+class User(UserMixin, Model):
+    username = CharField(unique=True, null=False)
+    email = CharField(unique=True, null=False)
+    password = CharField(max_length=25)
+
     class Meta:
-        database = database
-
-class User(BaseModel, UserMixin):
-    username = CharField(unique=True)
-    email = CharField()
-    password = CharField(max_length=15)
-    admin = BooleanField(default=False)
+        database = DATABASE
+        db_table = 'user'
 
     @classmethod
-    def create_user(cls, username, email, password, admin=False):
+    def create_user(cls, username, email, password):
         try:
             cls.create(
                 username = username,
                 email = email,
-                password = generate_password_hash(password),
-                admin = admin
+                password = generate_password_hash(password) 
             )
         except IntegrityError:
             raise
 
-    
+    @classmethod
+    def get_courses(self):
+        return Course.select().where(Course.user == self)
 
-class Course(BaseModel):
+    
+class Course(Model):
     name = CharField()
-    description = TextField()
-    duration = IntegerField()
+    description = CharField()
+    duration = CharField()
+    user = ForeignKeyField(User, backref="courses")
+
+    class Meta:
+        database = DATABASE
+        db_table = 'course'
 
     @classmethod
-    def create_course(cls, name, description, duration):
-        try: 
+    def create_course(cls, name, description, duration, user):
+        try:
             cls.create(
                 name = name,
                 description = description,
-                duration = duration
-            )
-        except IntegrityError:
-            raise ValueError("Course error")
-
-class Session(BaseModel):
-    name = CharField()
-    audio = CharField()
-    course = ForeignKeyField(User, backref="course")
-
-    @classmethod
-    def create_session(cls, name, audio, course):
-        try:
-            cls.create(
-                name = name,
-                audio = audio,
-                course = course
-            )
-        except IntegrityError:
-            raise
-
-class UserCourseSession(BaseModel):
-    user = ForeignKeyField(User, backref="user")
-    course = ForeignKeyField(Course, backref="courses")
-    # session = ForeignKeyField(Session, backref="sessions")
-
-    @classmethod
-    def create_user_session(cls, user, course):
-        try:
-            cls.create(
-                user = user,
-                course = course,
-                # session = session
+                duration = duration,
+                user=user
             )
         except IntegrityError:
             raise ValueError("course error")
 
+class Session(Course):
+    name = CharField()
+    description = TextField()
+    audio = CharField()
+    course = ForeignKeyField(Course, backref='course')
+    class Meta:
+        database = DATABASE
+        db_table = 'session'
+    
+    @classmethod
+    def create_session(cls, name, description, audio, course):
+        try:
+            cls.create(
+                name = name,
+                description = description,
+                audio = audio,
+                course=course
+            )
+        except IntegrityError:
+            raise
 
-#initialize database connection, create tables, and close out
+class UserCourseSession(Model):
+    user = ForeignKeyField(User, backref="user")
+    course = ForeignKeyField(Course, backref="courses")
+    session = ForeignKeyField(Session, backref="sessions")
+
+    class Meta:
+        database = DATABASE
+        db_table = 'user_course_session'
+
+    @classmethod
+    def create_user_session(cls, user, course, session):
+        try:
+            cls.create(
+                user = user,
+                course=course,
+                session = session
+            )
+        except IntegrityError:
+            raise ValueError("course error")
+
+# Initialize a connection to the database, create a table for the Session model, and close the connection
 def initialize():
-    database.connect()
-    database.create_tables([User, UserCourseSession, Course, Session])
-    database.close()
+        DATABASE.connect()
+        DATABASE.create_tables([User, Course, Session, UserCourseSession], safe=True)
+        DATABASE.close()

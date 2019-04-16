@@ -1,31 +1,22 @@
 {% extends "layout.html" %}
 {% block content %}
 <h1> Courses </h1>
+
 {% for course in courses %}
-    
-
-<article class="media content-section">
-    <div class="media-body">
-    <a class ="article-title" href={{url_for('courses')}}>
-        <div class="article-metadata">
-             {{course.name}}
-        </div>
-        <div class="article-content">
-            {{course.description}} 
-        </div>
-        <p class="article-content">
-            {{course.duration}}
-        </p>
-
-
-        <form method="POST" action="" novalidate>
-        {{ form.hidden_tag() }}
-
-      
-    
-        {{ form.submit() }}
-    </form>
-       <!-- <a class ="article-title" href={{url_for('dash')}}><button>Save Course</button></a> -->
+    <article class="media content-section">
+        <div class="media-body">
+            <a class ="article-title" href={{url_for('courses')}}>
+            <div class="article-metadata">
+                {{course.name}}
+            </div>
+            <div class="article-content">
+                {{course.description}} 
+            </div>
+            <p class="article-content">
+                {{course.duration}}
+            </p>
+            <a href="{{url_for('sessions', courseid=course.id)}}">View Sessions</a>
+            </a>
 
     </div>
 </article>

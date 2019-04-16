@@ -2,12 +2,13 @@ import time
 import moment
 import datetime
 
-from models import User, Course, Session
+from models import User
 from flask_login import current_user
-from flask_wtf import FlaskForm as Form
+from flask_wtf import FlaskForm as Form  
 from flask_wtf.file import FileField, FileAllowed
 from wtforms.validators import DataRequired, Regexp, ValidationError, Email, Length, EqualTo
-from wtforms import TextAreaField, TextField, SubmitField, StringField, PasswordField, SelectField, TimeField
+from wtforms import TextField, TextAreaField, SubmitField, StringField, PasswordField, SelectField, TimeField
+
 
 def name_exists(form, field):
     if User.select().where(User.username == field.data).exists():
@@ -24,12 +25,12 @@ class SignUpForm(Form):
             DataRequired(),
             Regexp(
                 r'^[a-zA-Z]+$',
-                message=("Name cannot contain symbols or special character")
+                message=("Name cannot contain symbols or special characters")
             ),
             name_exists
         ]
     )
-    email  = StringField(
+    email = StringField(
         'Email',
         validators=[
             DataRequired(),
@@ -49,7 +50,8 @@ class SignUpForm(Form):
         'Confirm Password',
         validators=[DataRequired()]
     )
-    submit = SubmitField("Sign Up")
+
+    submit = SubmitField('Sign Up')
 
 
 class LoginForm(Form):
@@ -62,14 +64,3 @@ class UpdateAccountForm(Form):
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField('Email', validators=[DataRequired()])
     submit = SubmitField('Update')
-
-class CourseForm(Form):
-    name = TextField("Name this course")
-    description = TextAreaField("Add Description")
-    duration = TextField("Add Duration")
-    submit = SubmitField('Create Course')
-
-class UserCourseSessionForm(Form):
-    user = TextField(),
-    course = TextField(),
-    sumbit = SubmitField()
